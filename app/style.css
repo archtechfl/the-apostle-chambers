@@ -1,0 +1,19 @@
+html, body {
+    font-family: Arial, serif, sans-serif;
+}
+
+p {
+    margin: 0 0 0.5em 0;
+}
+
+.nav-instructions {
+    margin: 0 0 0 1em;
+}
+
+h1 {
+    margin: 0 0 0.5em 0;
+}
+
+canvas, .nav-instructions {
+    float: left;
+}
