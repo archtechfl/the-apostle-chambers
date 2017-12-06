@@ -5,22 +5,22 @@
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-        directionalLight.position.set(100, 100, 100);
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
+        // directionalLight.position.set(100, 100, 100);
 
-        var targetObject = new THREE.Object3D();
-        targetObject.position.x = 0;
-        targetObject.position.y = 0;
-        targetObject.position.z = -20;
-        scene.add(targetObject);
+        // var targetObject = new THREE.Object3D();
+        // targetObject.position.x = 0;
+        // targetObject.position.y = 0;
+        // targetObject.position.z = -20;
+        // scene.add(targetObject);
 
-        directionalLight.target = targetObject;
+        // directionalLight.target = targetObject;
 
-        scene.add( directionalLight );
+        var light = new THREE.PointLight( 0x777777, 3, 10000 );
+        light.position.set( 0, 0, 0 );
+        scene.add( light );
 
-        // var pointLight = new THREE.PointLight(0xFFFFFF, 1, 100000);
-
-        // scene.add( pointLight );
+        // scene.add( directionalLight );
 
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize( window.innerWidth - 300, window.innerHeight * 0.9 );
@@ -44,29 +44,28 @@
 
         var extrudeSettings = {
             steps: 20,
-            amount: -25,
+            amount: -100,
             bevelEnabled: false
         };
 
         var tunnelGeometry = new THREE.ExtrudeGeometry( tunnel, extrudeSettings );
-        var tunnelMaterial = new THREE.MeshStandardMaterial( { color: 0xBABABA } );
+        var tunnelMaterial = new THREE.MeshStandardMaterial( { color: 0xBABABA, side: THREE.DoubleSide } );
         var tunnelMesh = new THREE.Mesh( tunnelGeometry, tunnelMaterial ) ;
 
         tunnelMesh.position.x = -10;
         tunnelMesh.position.y = -5;
         tunnelMesh.position.z = -10;
 
+        var tunnelMeshCopy = new THREE.Mesh( tunnelGeometry, tunnelMaterial ) ;;
+
+        tunnelMeshCopy.position.x = 10;
+        tunnelMeshCopy.position.y = -5;
+        tunnelMeshCopy.position.z = -110;
+
+        tunnelMeshCopy.rotation.set(0, ((2 * Math.PI) * -0.25), 0);
+
         scene.add( tunnelMesh );
-
-        // Add some fog
-
-        // var fog = new THREE.Fog('FF9922', 1, 20);
-
-        // scene.fog = fog;
-
-        // End tunnel mesh
-
-        // scene.add( walls3D );
+        scene.add( tunnelMeshCopy );
 
         camera.position.z = 0;
 
@@ -227,6 +226,9 @@
                             break;
                     }
                     camera.lookAt(cameraTarget);
+                    light.position.x = camera.position.x;
+                    light.position.y = camera.position.y;
+                    light.position.z = camera.position.z;
                 }
             };
 
