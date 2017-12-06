@@ -6,66 +6,67 @@
         var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
         var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-        directionalLight.position.set(5, 10, 5);
+        directionalLight.position.set(100, 100, 100);
+
+        var targetObject = new THREE.Object3D();
+        targetObject.position.x = 0;
+        targetObject.position.y = 0;
+        targetObject.position.z = -20;
+        scene.add(targetObject);
+
+        directionalLight.target = targetObject;
+
         scene.add( directionalLight );
 
-        var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.1 );
-        directionalLight2.position.set(5, 4, 5);
-        scene.add( directionalLight2 );
+        // var pointLight = new THREE.PointLight(0xFFFFFF, 1, 100000);
+
+        // scene.add( pointLight );
 
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize( window.innerWidth - 300, window.innerHeight * 0.9 );
 
-      var instructions = document.getElementById("instructions");
+        var instructions = document.getElementById("instructions");
 
-      this.document.body.insertBefore(renderer.domElement, this.document.body.firstChild);
-
-        var geometry = new THREE.CubeGeometry(0.1,0.1,0.1);
-
-        var material = new THREE.MeshLambertMaterial( { color: 0xBABABA, shading: THREE.FlatShading} );
-
-        var cubeContainer = new Object();
-
-        var cubes2 = new THREE.Object3D();
+        this.document.body.insertBefore(renderer.domElement, this.document.body.firstChild);
 
         var cameraTarget = new THREE.Vector3( 0, 0, -200 );
 
-        for (c=0; c<20000; c++){
-            cubeContainer["cube" + c] = new THREE.Mesh( geometry, material );
+        // Start tunnel mesh
 
-            let plusMinusX = Math.random();
-            if (plusMinusX < 0.5){
-                plusMinusX = -1;
-            } else {
-                plusMinusX = 1;
-            }
-            //console.log(plusMinusX);
+        var length = 20, width = 10;
 
-            let xC = (Math.random())*50;
-            xC = xC * plusMinusX;
+        var tunnel = new THREE.Shape();
+        tunnel.moveTo( 0,0 );
+        tunnel.lineTo( 0, width );
+        tunnel.lineTo( length, width );
+        tunnel.lineTo( length, 0 );
+        tunnel.lineTo( 0, 0 );
 
-            cubeContainer["cube" + c].position.x = xC;
+        var extrudeSettings = {
+            steps: 20,
+            amount: -25,
+            bevelEnabled: false
+        };
 
-            let plusMinusY = Math.random();
-            if (plusMinusY < 0.5){
-                plusMinusY = -1;
-            } else {
-                plusMinusY = 1;
-            }
-            //console.log(plusMinusY);
+        var tunnelGeometry = new THREE.ExtrudeGeometry( tunnel, extrudeSettings );
+        var tunnelMaterial = new THREE.MeshStandardMaterial( { color: 0xBABABA } );
+        var tunnelMesh = new THREE.Mesh( tunnelGeometry, tunnelMaterial ) ;
 
-            let yC = (Math.random())*50;
-            yC = yC * plusMinusY;
+        tunnelMesh.position.x = -10;
+        tunnelMesh.position.y = -5;
+        tunnelMesh.position.z = -10;
 
-            cubeContainer["cube" + c].position.y = yC;
+        scene.add( tunnelMesh );
 
-            let zC = (((Math.random())*50) + 2) * -1;
+        // Add some fog
 
-            cubeContainer["cube" + c].position.z = zC;
-            cubes2.add( cubeContainer["cube" + c] );
-        }
+        // var fog = new THREE.Fog('FF9922', 1, 20);
 
-        scene.add(cubes2);
+        // scene.fog = fog;
+
+        // End tunnel mesh
+
+        // scene.add( walls3D );
 
         camera.position.z = 0;
 
@@ -236,7 +237,6 @@
                 moveCamera();
 
                 renderer.render(scene, camera);
-
             };
 
         render();
