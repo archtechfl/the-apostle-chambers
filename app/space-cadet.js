@@ -64,8 +64,37 @@
 
         tunnelMeshCopy.rotation.set(0, ((2 * Math.PI) * -0.25), 0);
 
+		// var tunnel_alpha = new ThreeBSP( tunnelMesh );
+		// var tunnel_beta = new ThreeBSP( tunnelMeshCopy );
+
+		// var tunnel_combined = tunnel_alpha.union( tunnel_beta );
+
+		// var tunnel_combined_mesh = tunnel_combined.toMesh( new THREE.MeshLambertMaterial({
+        //     color: 0xBABABA,
+        //     side: THREE.DoubleSide
+        // }));
+
+        // scene.add( tunnel_combined_mesh );
+
         scene.add( tunnelMesh );
         scene.add( tunnelMeshCopy );
+
+        var cube_geometry = new THREE.CubeGeometry( 3, 3, 3 );
+		var cube_mesh = new THREE.Mesh( cube_geometry );
+		cube_mesh.position.x = -7;
+		var cube_bsp = new ThreeBSP( cube_mesh );
+		var sphere_geometry = new THREE.SphereGeometry( 1.8, 32, 32 );
+		var sphere_mesh = new THREE.Mesh( sphere_geometry );
+		sphere_mesh.position.x = -7;
+		var sphere_bsp = new ThreeBSP( sphere_mesh );
+
+		var subtract_bsp = cube_bsp.subtract( sphere_bsp );
+		var result = subtract_bsp.toMesh( new THREE.MeshLambertMaterial({
+			color: 0xBABABA,
+            side: THREE.DoubleSide
+		}));
+		result.geometry.computeVertexNormals();
+		scene.add( result );
 
         camera.position.z = 0;
 
