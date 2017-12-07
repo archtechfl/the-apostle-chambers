@@ -5,18 +5,7 @@
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-        // directionalLight.position.set(100, 100, 100);
-
-        // var targetObject = new THREE.Object3D();
-        // targetObject.position.x = 0;
-        // targetObject.position.y = 0;
-        // targetObject.position.z = -20;
-        // scene.add(targetObject);
-
-        // directionalLight.target = targetObject;
-
-        var light = new THREE.PointLight( 0x777777, 3, 10000 );
+        var light = new THREE.PointLight( 0x777777, 2, 10000 );
         light.position.set( 0, 0, 0 );
         scene.add( light );
 
@@ -31,53 +20,64 @@
 
         var cameraTarget = new THREE.Vector3( 0, 0, -200 );
 
-        // Start tunnel mesh
-
-        var length = 20, width = 10;
-
-        var tunnel = new THREE.Shape();
-        tunnel.moveTo( 0,0 );
-        tunnel.lineTo( 0, width );
-        tunnel.lineTo( length, width );
-        tunnel.lineTo( length, 0 );
-        tunnel.lineTo( 0, 0 );
-
-        var extrudeSettings = {
-            steps: 20,
-            amount: -100,
-            bevelEnabled: false
-        };
-
-        var tunnelGeometry = new THREE.ExtrudeGeometry( tunnel, extrudeSettings );
-        var tunnelMaterial = new THREE.MeshStandardMaterial( { color: 0xBABABA, side: THREE.DoubleSide } );
-        var tunnelMesh = new THREE.Mesh( tunnelGeometry, tunnelMaterial ) ;
-
-        tunnelMesh.position.x = -10;
-        tunnelMesh.position.y = -5;
-        tunnelMesh.position.z = -10;
-
-        var tunnelMeshCopy = new THREE.Mesh( tunnelGeometry, tunnelMaterial ) ;;
-
-        tunnelMeshCopy.position.x = 10;
-        tunnelMeshCopy.position.y = -5;
-        tunnelMeshCopy.position.z = -110;
-
-        tunnelMeshCopy.rotation.set(0, ((2 * Math.PI) * -0.25), 0);
-
-		var tunnel_alpha = new ThreeBSP( tunnelMesh );
-		var tunnel_beta = new ThreeBSP( tunnelMeshCopy );
-
-		var tunnel_combined = tunnel_alpha.union( tunnel_beta );
-
-		var tunnel_combined_mesh = tunnel_combined.toMesh( new THREE.MeshLambertMaterial({
+        var geometry = new THREE.BoxGeometry( 20, 10, 50 );
+        var material = new THREE.MeshStandardMaterial({
             color: 0xBABABA,
             side: THREE.DoubleSide
-        }));
+        });
+        var tunnel = new THREE.Mesh( geometry, material );
 
-        scene.add( tunnel_combined_mesh );
+        var baseMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFF0000,
+            side: THREE.DoubleSide
+        });
 
-        scene.add( tunnelMesh );
-        scene.add( tunnelMeshCopy );
+        var geometryBeta = new THREE.BoxGeometry( 1, 1, 1 );
+        var base = new THREE.Mesh( geometryBeta, baseMaterial );
+
+        tunnel.position.x = 0;
+        tunnel.position.y = 0;
+        tunnel.position.z = -50;
+
+        base.position.x = 0;
+        base.position.y = 0;
+        base.position.z = -25;
+
+        // Union experiment
+
+		// var alpha_bsp = new ThreeBSP( tunnel );
+		// var beta_bsp = new ThreeBSP( base );
+
+		// var union_bsp = alpha_bsp.subtract( beta_bsp );
+
+		// var result = union_bsp.toMesh( new THREE.MeshLambertMaterial({
+        //     shading: THREE.SmoothShading,
+		// 	color: 0xBABABA,
+        //     side: THREE.DoubleSide
+        // }));
+
+		// result.geometry.computeVertexNormals();
+        // scene.add( result );
+
+        // End union experiment
+
+        scene.add(tunnel, base);
+
+        var sphere_geometry = new THREE.SphereGeometry( 50, 32, 32 );
+		var sphere_bsp = new ThreeBSP( sphere_geometry );
+
+		var cube_geometry = new THREE.CubeGeometry( 150, 40, 40 );
+		var cube_bsp = new ThreeBSP( cube_geometry );
+
+		var union_bsp = sphere_bsp.union( cube_bsp );
+
+		var result = union_bsp.toMesh( new THREE.MeshLambertMaterial({
+            shading: THREE.SmoothShading,
+			color: 0xBABABA,
+            side: THREE.DoubleSide
+		}));
+		result.geometry.computeVertexNormals();
+		scene.add( result );
 
         camera.position.z = 0;
 
