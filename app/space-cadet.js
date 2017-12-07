@@ -20,30 +20,20 @@
 
         var cameraTarget = new THREE.Vector3( 0, 0, -200 );
 
+        var tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: THREE.DoubleSide } );
+
         // Union experiment
 
-        var centralGalleryGeo = new THREE.CubeGeometry( 4, 4, 4, 64, 64, 64 );
-		var centralGallery_bsp = new ThreeBSP( centralGalleryGeo );
+        var x = 0,
+            y = 0,
+            z = 0;
 
-		var cube_geometry = new THREE.CubeGeometry( 40, 1, 1, 64, 64, 64 );
-        var cube_bsp = new ThreeBSP( cube_geometry );
-
-        var cubeGeometryTwo = new THREE.CubeGeometry( 2, 1, 40, 64, 64, 64 );
-        var cube_two_bsp = new ThreeBSP( cubeGeometryTwo );
-
-        var union_bsp = centralGallery_bsp.union( cube_bsp ).union( cube_two_bsp );
-
-		var result = union_bsp.toMesh( new THREE.MeshLambertMaterial({
-            shading: THREE.SmoothShading,
-			color: 0xBABABA,
-            side: THREE.DoubleSide
-		}));
-		result.geometry.computeVertexNormals();
-        scene.add( result );
-
-        // wall experiment
-
-        // End wall experiment
+        for (var j = 0; j < 5; j++) {
+            let galleryGeo = new THREE.CubeGeometry( 3, 3, 3, 64, 64, 64 );
+            let galleryMesh = new THREE.Mesh( galleryGeo, tunnelMaterial );
+            galleryMesh.position.set(j * 10,y,z);
+            scene.add( galleryMesh );
+        }
 
         camera.position.z = 0;
 
