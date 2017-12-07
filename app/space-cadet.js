@@ -22,18 +22,67 @@
 
         var tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: THREE.DoubleSide } );
 
+        function buildRowBSP(length, width, height, material, position) {
+            let tunnelGeo = new THREE.CubeGeometry( length, width, height, 64, 64, 64 );
+            let tunnelMesh = new THREE.Mesh( tunnelGeo, tunnelMaterial );
+            tunnelMesh.position.set(position.x,position.y,position.z);
+            var tunnel_bsp = new ThreeBSP( tunnelMesh );
+            return tunnel_bsp;
+        }
+
+        function buildGalleryBSP(height, length, width, material, position) {
+            let galleryGeo = new THREE.CubeGeometry( height, length, width, 64, 64, 64 );
+            let galleryMesh = new THREE.Mesh( galleryGeo, tunnelMaterial );
+            galleryMesh.position.set(position.x,position.y,position.z);
+            let gallery_bsp = new ThreeBSP( galleryMesh );
+            return gallery_bsp;
+        }
+
         // Union experiment
 
-        var x = 0,
-            y = 0,
-            z = 0;
+        function buildInitialRowBSP(tunnelMaterial, y, z) {
+            var tunnel_bsp = buildRowBSP(30, 1, 1, tunnelMaterial, {x: 15, y: 0, z: 0});
 
-        for (var j = 0; j < 5; j++) {
-            let galleryGeo = new THREE.CubeGeometry( 3, 3, 3, 64, 64, 64 );
-            let galleryMesh = new THREE.Mesh( galleryGeo, tunnelMaterial );
-            galleryMesh.position.set(j * 10,y,z);
-            scene.add( galleryMesh );
+            for (var j = 0; j < 4; j++) {
+                let gallery_bsp = buildGalleryBSP(3,3,3, tunnelMaterial, {x: j * 10, y: y, z: z});
+                tunnel_bsp = tunnel_bsp.union(gallery_bsp);
+                // Add depth tunnels
+                let depthGeo = new THREE.CubeGeometry( 1, 1, 20, 64, 64, 64 );
+                let depthMesh = new THREE.Mesh( depthGeo, tunnelMaterial );
+                depthMesh.position.set(j * 10,y,-10);
+                let depth_bsp = new ThreeBSP( depthMesh );
+                tunnel_bsp = tunnel_bsp.union(depth_bsp);
+            }
+            return tunnel_bsp;
+        };
+
+        // Build remaining rows
+
+        function buildAdditionalRows(bsp, tunnelMaterial, y, z) {
+            for (var rowCount = 0; rowCount < 2; rowCount++) {
+                var tunnel_bsp = buildRowBSP(30, 1, 1, tunnelMaterial, {x: 15, y: y, z: z});
+                for (var j = 0; j < 4; j++) {
+                    let gallery_bsp = buildGalleryBSP(3,3,3, tunnelMaterial, {x: j * 10, y: y, z: z});
+                    tunnel_bsp = tunnel_bsp.union(gallery_bsp);
+                }
+                bsp = bsp.union(tunnel_bsp);
+                z -= 10;
+            }
+            return bsp;
         }
+
+        var initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0);
+
+        var combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10);
+
+        var tunnel_mesh = combined_bsp.toMesh( new THREE.MeshLambertMaterial({
+            color: 0xBABABA,
+            side: THREE.DoubleSide
+        }));
+
+        scene.add( tunnel_mesh );
+
+        // Set camera position and target
 
         camera.position.z = 0;
 
@@ -60,12 +109,12 @@
                     }
                     switch (key) {
                         case 40:
-                            camera.position.y -= 1;
-                            cameraTarget.y -= 1;
+                            // camera.position.y -= 1;
+                            // cameraTarget.y -= 1;
                             break;
                         case 38:
-                            camera.position.y += 1;
-                            cameraTarget.y += 1;
+                            // camera.position.y += 1;
+                            // cameraTarget.y += 1;
                             break;
                         case 37:
                             // Left arrow
