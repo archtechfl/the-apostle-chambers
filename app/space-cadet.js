@@ -20,56 +20,18 @@
 
         var cameraTarget = new THREE.Vector3( 0, 0, -200 );
 
-        var geometry = new THREE.BoxGeometry( 20, 10, 50 );
-        var material = new THREE.MeshStandardMaterial({
-            color: 0xBABABA,
-            side: THREE.DoubleSide
-        });
-        var tunnel = new THREE.Mesh( geometry, material );
-
-        var baseMaterial = new THREE.MeshStandardMaterial({
-            color: 0xFF0000,
-            side: THREE.DoubleSide
-        });
-
-        var geometryBeta = new THREE.BoxGeometry( 1, 1, 1 );
-        var base = new THREE.Mesh( geometryBeta, baseMaterial );
-
-        tunnel.position.x = 0;
-        tunnel.position.y = 0;
-        tunnel.position.z = -50;
-
-        base.position.x = 0;
-        base.position.y = 0;
-        base.position.z = -25;
-
         // Union experiment
 
-		// var alpha_bsp = new ThreeBSP( tunnel );
-		// var beta_bsp = new ThreeBSP( base );
+        var centralGalleryGeo = new THREE.CubeGeometry( 4, 4, 4, 64, 64, 64 );
+		var centralGallery_bsp = new ThreeBSP( centralGalleryGeo );
 
-		// var union_bsp = alpha_bsp.subtract( beta_bsp );
+		var cube_geometry = new THREE.CubeGeometry( 40, 1, 1, 64, 64, 64 );
+        var cube_bsp = new ThreeBSP( cube_geometry );
 
-		// var result = union_bsp.toMesh( new THREE.MeshLambertMaterial({
-        //     shading: THREE.SmoothShading,
-		// 	color: 0xBABABA,
-        //     side: THREE.DoubleSide
-        // }));
+        var cubeGeometryTwo = new THREE.CubeGeometry( 2, 1, 40, 64, 64, 64 );
+        var cube_two_bsp = new ThreeBSP( cubeGeometryTwo );
 
-		// result.geometry.computeVertexNormals();
-        // scene.add( result );
-
-        // End union experiment
-
-        scene.add(tunnel, base);
-
-        var sphere_geometry = new THREE.SphereGeometry( 50, 32, 32 );
-		var sphere_bsp = new ThreeBSP( sphere_geometry );
-
-		var cube_geometry = new THREE.CubeGeometry( 150, 40, 40 );
-		var cube_bsp = new ThreeBSP( cube_geometry );
-
-		var union_bsp = sphere_bsp.union( cube_bsp );
+        var union_bsp = centralGallery_bsp.union( cube_bsp ).union( cube_two_bsp );
 
 		var result = union_bsp.toMesh( new THREE.MeshLambertMaterial({
             shading: THREE.SmoothShading,
@@ -77,7 +39,11 @@
             side: THREE.DoubleSide
 		}));
 		result.geometry.computeVertexNormals();
-		scene.add( result );
+        scene.add( result );
+
+        // wall experiment
+
+        // End wall experiment
 
         camera.position.z = 0;
 
