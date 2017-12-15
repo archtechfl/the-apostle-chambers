@@ -210,16 +210,16 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 switch (key) {
                     case 16:
                         // Load geometries for reference
-                        const doorA = retrieveFromScene("first door");
-                        if ( (cameraPositionZ < doorA.position.z + 4) && ( cameraPositionZ > doorA.position.z - 4) ){
-                            // Only open door if it is closed
-                            if (isDoorClosed) {
-                                doorA.position.y += 4;
-                                createMaze();
-                                isDoorClosed = false;
-                            }
-                        }
-                        break;
+                        // const doorA = retrieveFromScene("first door");
+                        // if ( (cameraPositionZ < doorA.position.z + 4) && ( cameraPositionZ > doorA.position.z - 4) ){
+                        //     // Only open door if it is closed
+                        //     if (isDoorClosed) {
+                        //         doorA.position.y += 4;
+                        //         createMaze();
+                        //         isDoorClosed = false;
+                        //     }
+                        // }
+                        // break;
                     case 40:
                         var collisionDetected = determineCollision(raycaster, scene, camera, "y", "-");
                         if (!collisionDetected){
