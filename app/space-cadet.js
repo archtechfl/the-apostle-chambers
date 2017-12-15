@@ -1,5 +1,8 @@
 // JavaScript Document
 
+import * as THREE from 'three';
+const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
+
 (function threeApp () {
 
         var scene = new THREE.Scene();
