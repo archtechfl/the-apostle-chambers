@@ -100,9 +100,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
                 tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 // Add depth tunnels
-                let depthGeo = new THREE.CubeGeometry( 3, 3, 20, 2, 2, 2 );
+                let depthGeo = new THREE.CubeGeometry( 3, 3, 60, 2, 2, 2 );
                 let depthMesh = new THREE.Mesh( depthGeo, tunnelMaterial );
-                depthMesh.position.set(j * 10,y,-10);
+                depthMesh.position.set(j * 10,y,-30);
                 let depth_bsp = new ThreeBSP( depthMesh );
                 tunnel_bsp = tunnel_bsp.union(depth_bsp);
             }
@@ -112,7 +112,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Build remaining rows
 
         function buildAdditionalRows(bsp, tunnelMaterial, y, z) {
-            for (var rowCount = 0; rowCount < 2; rowCount++) {
+            for (var rowCount = 0; rowCount < 7; rowCount++) {
                 var tunnel_bsp = buildRowBSP(30, 3, 3, tunnelMaterial, {x: 15, y: y, z: z});
                 for (var j = 0; j < 4; j++) {
                     let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
