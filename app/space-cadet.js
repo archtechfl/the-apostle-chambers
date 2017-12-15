@@ -28,6 +28,10 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             light.position.set( 0, 0, 0 );
             scene.add( light );
 
+            camera.position.z = 0;
+
+            camera.lookAt(cameraTarget);
+
             return {
                 scene: scene,
                 camera: camera,
@@ -136,10 +140,6 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         scene.add( tunnel_mesh );
 
         // Set camera position and target
-
-        camera.position.z = 0;
-
-        camera.lookAt(cameraTarget);
 
         // Move the camera in the three dimensional space
         function controls ()
