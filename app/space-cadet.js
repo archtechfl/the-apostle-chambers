@@ -28,11 +28,17 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             light.position.set( 0, 0, 0 );
             scene.add( light );
 
+            let mazeDimensions = {
+                "length": 100,
+                "width": 100
+            }
+
             return {
                 scene: scene,
                 camera: camera,
                 cameraTarget: cameraTarget,
-                light: light
+                light: light,
+                dimensions: mazeDimensions
             }
 
         }
@@ -40,6 +46,11 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Call scene setup
 
         var setUp = setUpScene();
+
+        // var counter = 0;
+
+        // Use to keep track of the coordinates of all passages
+        var mazePassages = [];
 
         // Raycaster for collision detection
 
@@ -50,7 +61,11 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         var camera = setUp.camera,
             scene = setUp.scene,
             cameraTarget = setUp.cameraTarget,
-            light = setUp.light;
+            light = setUp.light,
+            mazeWidth = setUp.dimensions.width,
+            mazeLength =  setUp.dimensions.length;
+
+        // Set up renderer
 
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize( window.innerWidth - 300, window.innerHeight * 0.9 );
@@ -67,7 +82,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Generate the materials needed for the scene
 
         function generateMaterials() {
-            let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: THREE.DoubleSide } );
+            let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: THREE.BackSide } );
             return {
                 tunnel: tunnelMaterial
             }
@@ -107,8 +122,11 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             var depth = Math.round(depth / 10) * 10;
             var length = Math.round(length / 10) * 10;
 
-            for (var j = 0; j <= Math.floor(length / 10); j++) {
+            for (var j = 0; j <= (length / 10); j++) {
                 let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
+                if (j !== (length / 10)){
+                    mazePassages.push([(j * 10) + 5, z]);
+                }
                 tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 // Add depth tunnels
                 let depthGeo = new THREE.CubeGeometry( 3, 3, depth, 2, 2, 2 );
@@ -133,6 +151,10 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: y, z: z});
                 for (var j = 0; j <= (length / 10); j++) {
                     let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
+                    mazePassages.push([(j * 10), z + 5]);
+                    if (j !== (length / 10)){
+                        mazePassages.push([(j * 10) + 5, z]);
+                    }
                     tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 }
                 bsp = bsp.union(tunnel_bsp);
@@ -143,18 +165,26 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Perform geometry union
 
-        var initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, 200, 200);
+        function generateMazeGeoemetry(){
+            let initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, mazeLength, mazeWidth);
+            let combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, mazeLength, mazeWidth);
+            let combined_mesh = combined_bsp.toMesh( tunnelMaterial );
+            return combined_mesh;
+        }
 
-        var combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, 200, 200);
+        var mazeFinal = generateMazeGeoemetry();
 
-        var tunnel_mesh = combined_bsp.toMesh( new THREE.MeshLambertMaterial({
-            color: 0xBABABA,
-            side: THREE.FrontSide
-        }));
+        console.log(mazePassages);
 
         // Add unioned geometry to scene
 
-        scene.add( tunnel_mesh );
+        scene.add( mazeFinal );
+
+        for (var passageCounter = 0; passageCounter < 40; passageCounter++) {
+            var passageIndex =  Math.ceil(Math.random() * mazePassages.length);
+            // Remove passage now that it has been selected
+            var passageSelected = mazePassages.splice(passageIndex, 1);
+        }
 
         // Set camera position and target
 
@@ -198,7 +228,6 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 var collisionDetected = false;
                 if (intersects.length > 0) {
                     distance = intersects[0].distance;
-                    console.log(distance);
                 }
                 if (Math.round(distance) <= 1) {
                     collisionDetected = true;
@@ -438,6 +467,12 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 requestAnimationFrame(render);
 
                 controls();
+
+                // counter++;
+
+                // if (counter % 60 === 0) {
+                //     document.getElementById("time-elapsed").textContent = counter / 60;
+                // }
 
                 renderer.render(scene, camera);
             };
