@@ -95,18 +95,18 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             return gallery_bsp;
         }
 
-        // Union experiment
+        function buildInitialRowBSP(tunnelMaterial, y, z, length, depth) {
+            var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: 0, z: 0});
+            var depth = Math.round(depth / 10) * 10;
+            var length = Math.round(length / 10) * 10;
 
-        function buildInitialRowBSP(tunnelMaterial, y, z) {
-            var tunnel_bsp = buildRowBSP(30, 3, 3, tunnelMaterial, {x: 15, y: 0, z: 0});
-
-            for (var j = 0; j < 4; j++) {
+            for (var j = 0; j <= Math.floor(length / 10); j++) {
                 let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
                 tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 // Add depth tunnels
-                let depthGeo = new THREE.CubeGeometry( 3, 3, 60, 2, 2, 2 );
+                let depthGeo = new THREE.CubeGeometry( 3, 3, depth, 2, 2, 2 );
                 let depthMesh = new THREE.Mesh( depthGeo, tunnelMaterial );
-                depthMesh.position.set(j * 10,y,-30);
+                depthMesh.position.set(j * 10,y, ((depth * -1) / 2));
                 let depth_bsp = new ThreeBSP( depthMesh );
                 tunnel_bsp = tunnel_bsp.union(depth_bsp);
             }
@@ -115,10 +115,14 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Build remaining rows
 
-        function buildAdditionalRows(bsp, tunnelMaterial, y, z) {
-            for (var rowCount = 0; rowCount < 7; rowCount++) {
-                var tunnel_bsp = buildRowBSP(30, 3, 3, tunnelMaterial, {x: 15, y: y, z: z});
-                for (var j = 0; j < 4; j++) {
+        function buildAdditionalRows(bsp, tunnelMaterial, y, z, length, depth) {
+
+            var depthSteps = Math.round(depth / 10) - 1;
+            var length = Math.round(length / 10) * 10;
+
+            for (var rowCount = 0; rowCount <= depthSteps; rowCount++) {
+                var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: y, z: z});
+                for (var j = 0; j <= (length / 10); j++) {
                     let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
                     tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 }
@@ -128,14 +132,18 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             return bsp;
         }
 
-        var initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0);
+        // Perform geometry union
 
-        var combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10);
+        var initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, 200, 200);
+
+        var combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, 200, 200);
 
         var tunnel_mesh = combined_bsp.toMesh( new THREE.MeshLambertMaterial({
             color: 0xBABABA,
             side: THREE.DoubleSide
         }));
+
+        // Add unioned geometry to scene
 
         scene.add( tunnel_mesh );
 
