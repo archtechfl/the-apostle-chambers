@@ -81,9 +81,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Generate the materials needed for the scene
 
-        function generateMaterials(sideRenderingSystem) {
+        function generateMaterials(MaterialType, sideRenderingSystem) {
             // Use a MeshLambertMaterial for shadows
-            let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: sideRenderingSystem } );
+            let tunnelMaterial = new MaterialType( { color: 0xBABABA, side: sideRenderingSystem } );
             return {
                 tunnel: tunnelMaterial
             }
@@ -91,7 +91,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Generate the material needed (this function designed to scale for multiple materials)
 
-        var materials = generateMaterials(THREE.BackSide);
+        var materials = generateMaterials(THREE.MeshLambertMaterial, THREE.BackSide);
 
         var tunnelMaterial = materials.tunnel;
 
@@ -469,8 +469,10 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         function render()
             {
+                // Animation loop
                 requestAnimationFrame(render);
 
+                // Respond to user navigation
                 var userActions = controls(scene, camera, cameraTarget, light);
 
                 // Update renderer
@@ -480,6 +482,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 // Update light
                 light = userActions.light;
 
+                // Render updated scene
                 renderer.render(mazeScene, mazeCamera);
             };
 
