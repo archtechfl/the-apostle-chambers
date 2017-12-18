@@ -61,9 +61,10 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         var camera = setUp.camera,
             scene = setUp.scene,
             cameraTarget = setUp.cameraTarget,
-            light = setUp.light,
-            mazeWidth = setUp.dimensions.width,
-            mazeLength =  setUp.dimensions.length;
+            light = setUp.light;
+
+        let mazeWidth = setUp.dimensions.width,
+            mazeLength = setUp.dimensions.length;
 
         // Set up renderer
 
@@ -91,9 +92,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Generate the material needed (this function designed to scale for multiple materials)
 
-        var materials = generateMaterials(THREE.MeshLambertMaterial, THREE.BackSide);
+        let materials = generateMaterials(THREE.MeshLambertMaterial, THREE.BackSide);
 
-        var tunnelMaterial = materials.tunnel;
+        let tunnelMaterial = materials.tunnel;
 
         // Builds a single row, turning it into a BSP tree
 
@@ -175,9 +176,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Perform geometry union
 
-        function generateMazeGeoemetry(GraphicSystem){
-            let initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, mazeLength, mazeWidth, GraphicSystem);
-            let combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, mazeLength, mazeWidth, GraphicSystem);
+        function generateMazeGeoemetry(GraphicSystem, tunnelMaterial, length, width){
+            let initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, length, width, GraphicSystem);
+            let combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, length, width, GraphicSystem);
             let combined_mesh = combined_bsp.toMesh( tunnelMaterial );
             return combined_mesh;
         }
@@ -185,7 +186,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Call the maze generation wrapper function and pass it the THREE graphics library
         // Maze generation is now purely functional
 
-        var mazeFinal = generateMazeGeoemetry(THREE);
+        var mazeFinal = generateMazeGeoemetry(THREE, tunnelMaterial, mazeLength, mazeWidth);
 
         // Add unioned geometry to scene
 
