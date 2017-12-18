@@ -198,13 +198,13 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Move the camera in the three dimensional space
         function controls (mazeScene, mazeCamera, mazeCameraTarget, cameraLight)
         {
-            function determineCollision(scene, camera, axis, operation) {
+            function determineCollision(collisionScene, collisionCamera, axis, operation) {
                 // Cast a ray from the camera position in the direction of the intended movement, and check for any collision
-                var origin = camera.position.clone(),
-                    environment = scene.children,
+                var origin = collisionCamera.position.clone(),
+                    environment = collisionScene.children,
                     ray = new THREE.Raycaster(),
                     distance = 15, // Vector for ray
-                    destination = camera.position.clone(); // The future position
+                    destination = collisionCamera.position.clone(); // The future position
                 if (axis === "x") {
                     if (operation === "+") {
                         destination.setX( destination.x + 1 );
@@ -227,9 +227,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 // Raycast from camera to camera target
                 let directionVector = destination.sub( origin );
                 ray.set( origin, directionVector.clone().normalize() );
-                scene.updateMatrixWorld();
+                collisionScene.updateMatrixWorld();
                 // calculate objects intersecting the picking ray
-                let intersects = ray.intersectObjects( scene.children, true );
+                let intersects = ray.intersectObjects( collisionScene.children, true );
                 // Distance holder
                 var collisionDetected = false;
                 if (intersects.length > 0) {
