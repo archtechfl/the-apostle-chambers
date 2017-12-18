@@ -200,7 +200,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         }
 
         // Move the camera in the three dimensional space
-        function controls ()
+        function controls (mazeScene, mazeCamera, mazeCameraTarget, cameraLight)
         {
             function determineCollision(rayMaster, scene, camera, axis, operation) {
                 // Cast a ray from the camera position in the direction of the intended movement, and check for any collision
@@ -250,12 +250,13 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 // Read key
                 let key = e.keyCode ? e.keyCode : e.which;
                 // Get camera target
-                let targetPositionZ = cameraTarget.z;
-                let targetPositionX = cameraTarget.x;
-                let cameraPositionZ = camera.position.z;
-                let cameraPositionX = camera.position.x;
+                let targetPositionZ = mazeCameraTarget.z;
+                let targetPositionX = mazeCameraTarget.x;
+                let cameraPositionZ = mazeCamera.position.z;
+                let cameraPositionX = mazeCamera.position.x;
                 var cameraDirection = '';
                 // Figure out where the camera is pointing
+                // The directions are relative to the initial view (camera pointing towards - on the Z axis)
                 if (targetPositionZ > cameraPositionZ) {
                     cameraDirection = "behind";
                 } else if (targetPositionZ < cameraPositionZ) {
@@ -265,60 +266,48 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 }
                 // Keyboard actions
                 switch (key) {
-                    case 16:
-                        // Load geometries for reference
-                        // const doorA = retrieveFromScene("first door");
-                        // if ( (cameraPositionZ < doorA.position.z + 4) && ( cameraPositionZ > doorA.position.z - 4) ){
-                        //     // Only open door if it is closed
-                        //     if (isDoorClosed) {
-                        //         doorA.position.y += 4;
-                        //         createMaze();
-                        //         isDoorClosed = false;
-                        //     }
-                        // }
-                        // break;
                     case 40:
-                        var collisionDetected = determineCollision(raycaster, scene, camera, "y", "-");
+                        var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "y", "-");
                         if (!collisionDetected){
-                            camera.position.y -= 1;
-                            cameraTarget.y -= 1;
+                            mazeCamera.position.y -= 1;
+                            mazeCameraTarget.y -= 1;
                         }
                         break;
                     case 38:
-                        var collisionDetected = determineCollision(raycaster, scene, camera, "y", "+");
+                        var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "y", "+");
                         if (!collisionDetected){
-                            camera.position.y += 1;
-                            cameraTarget.y += 1;
+                            mazeCamera.position.y += 1;
+                            mazeCameraTarget.y += 1;
                         }
                         break;
                     case 37:
                         // Left arrow
                         if (cameraDirection === "ahead") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "x", "-");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "-");
                             if (!collisionDetected){
-                                camera.position.x -= 1;
-                                cameraTarget.x -= 1;
+                                mazeCamera.position.x -= 1;
+                                mazeCameraTarget.x -= 1;
                             }
                         } else if (cameraDirection === "behind") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "x", "+");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "+");
                             if (!collisionDetected){
-                                camera.position.x += 1;
-                                cameraTarget.x += 1;
+                                mazeCamera.position.x += 1;
+                                mazeCameraTarget.x += 1;
                             }
                         } else {
                             if (targetPositionX > cameraPositionX){
                                 // Looking x pos
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "z", "-");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "-");
                                 if (!collisionDetected){
-                                    camera.position.z -= 1;
-                                    cameraTarget.z -= 1;
+                                    mazeCamera.position.z -= 1;
+                                    mazeCameraTarget.z -= 1;
                                 }
                             } else {
                                 // Looking x neg
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "z", "+");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "+");
                                 if (!collisionDetected){
-                                    camera.position.z += 1;
-                                    cameraTarget.z += 1;
+                                    mazeCamera.position.z += 1;
+                                    mazeCameraTarget.z += 1;
                                 }
                             }
                         }
@@ -326,31 +315,31 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                     case 39:
                         // Right arrow
                         if (cameraDirection === "ahead") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "x", "+");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "+");
                             if (!collisionDetected){
-                                camera.position.x += 1;
-                                cameraTarget.x += 1;
+                                mazeCamera.position.x += 1;
+                                mazeCameraTarget.x += 1;
                             }
                         } else if (cameraDirection === "behind") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "x", "-");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "-");
                             if (!collisionDetected){
-                                camera.position.x -= 1;
-                                cameraTarget.x -= 1;
+                                mazeCamera.position.x -= 1;
+                                mazeCameraTarget.x -= 1;
                             }
                         } else {
                             if (targetPositionX > cameraPositionX){
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "z", "+");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "+");
                                 if (!collisionDetected){
                                 // Looking x pos
-                                    camera.position.z += 1;
-                                    cameraTarget.z += 1;
+                                    mazeCamera.position.z += 1;
+                                    mazeCameraTarget.z += 1;
                                 }
                             } else {
                                 // Looking x neg
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "z", "-");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "-");
                                 if (!collisionDetected){
-                                    camera.position.z -= 1;
-                                    cameraTarget.z -= 1;
+                                    mazeCamera.position.z -= 1;
+                                    mazeCameraTarget.z -= 1;
                                 }
                             }
                         }
@@ -358,31 +347,31 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                     case 65:
                         // A key (nominally "forward")
                         if (cameraDirection === "ahead") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "z", "-");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "-");
                             if (!collisionDetected){
-                                camera.position.z -= 1;
-                                cameraTarget.z -= 1;
+                                mazeCamera.position.z -= 1;
+                                mazeCameraTarget.z -= 1;
                             }
                         } else if (cameraDirection === "behind") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "z", "+");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "+");
                             if (!collisionDetected){
-                                camera.position.z += 1;
-                                cameraTarget.z += 1;
+                                mazeCamera.position.z += 1;
+                                mazeCameraTarget.z += 1;
                             }
                         } else {
                             if (targetPositionX > cameraPositionX){
                                 // Looking x pos
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "x", "+");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "+");
                                 if (!collisionDetected){
-                                    camera.position.x += 1;
-                                    cameraTarget.x += 1;
+                                    mazeCamera.position.x += 1;
+                                    mazeCameraTarget.x += 1;
                                 }
                             } else {
                                 // Looking x neg
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "x", "-");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "-");
                                 if (!collisionDetected){
-                                    camera.position.x -= 1;
-                                    cameraTarget.x -= 1;
+                                    mazeCamera.position.x -= 1;
+                                    mazeCameraTarget.x -= 1;
                                 }
                             }
                         }
@@ -390,31 +379,31 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                     case 90:
                         // Z key (nominally "reverse")
                         if (cameraDirection === "ahead") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "z", "+");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "+");
                             if (!collisionDetected){
-                                camera.position.z += 1;
-                                cameraTarget.z += 1;
+                                mazeCamera.position.z += 1;
+                                mazeCameraTarget.z += 1;
                             }
                         } else if (cameraDirection === "behind") {
-                            var collisionDetected = determineCollision(raycaster, scene, camera, "z", "-");
+                            var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "z", "-");
                             if (!collisionDetected){
-                                camera.position.z -= 1;
-                                cameraTarget.z -= 1;
+                                mazeCamera.position.z -= 1;
+                                mazeCameraTarget.z -= 1;
                             }
                         } else {
                             if (targetPositionX > cameraPositionX){
                                 // Looking x pos
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "x", "-");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "-");
                                 if (!collisionDetected){
-                                    camera.position.x -= 1;
-                                    cameraTarget.x -= 1;
+                                    mazeCamera.position.x -= 1;
+                                    mazeCameraTarget.x -= 1;
                                 }
                             } else {
                                 // Looking x neg
-                                var collisionDetected = determineCollision(raycaster, scene, camera, "x", "+");
+                                var collisionDetected = determineCollision(raycaster, mazeScene, mazeCamera, "x", "+");
                                 if (!collisionDetected){
-                                    camera.position.x += 1;
-                                    cameraTarget.x += 1;
+                                    mazeCamera.position.x += 1;
+                                    mazeCameraTarget.x += 1;
                                 }
                             }
                         }
@@ -423,20 +412,20 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                         // Rotate camera counterclockwise 90 degrees (Q)
                         console.log("Counterclockwise");
                         if (cameraDirection === "ahead") {
-                            cameraTarget.z = cameraPositionZ;
-                            cameraTarget.x = cameraPositionX - 1;
+                            mazeCameraTarget.z = cameraPositionZ;
+                            mazeCameraTarget.x = cameraPositionX - 1;
                         } else if (cameraDirection === "behind") {
-                            cameraTarget.z = cameraPositionZ;
-                            cameraTarget.x = cameraPositionX + 1;
+                            mazeCameraTarget.z = cameraPositionZ;
+                            mazeCameraTarget.x = cameraPositionX + 1;
                         } else {
                             if (targetPositionX > cameraPositionX){
                                 // Looking x pos
-                                cameraTarget.z = cameraPositionZ - 1;
-                                cameraTarget.x = cameraPositionX;
+                                mazeCameraTarget.z = cameraPositionZ - 1;
+                                mazeCameraTarget.x = cameraPositionX;
                             } else {
                                 // Looking x neg
-                                cameraTarget.z = cameraPositionZ + 1;
-                                cameraTarget.x = cameraPositionX;
+                                mazeCameraTarget.z = cameraPositionZ + 1;
+                                mazeCameraTarget.x = cameraPositionX;
                             }
                         }
                         break;
@@ -444,20 +433,20 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                         // Rotate camera clockwise 90 degrees (W)
                         console.log("Clockwise");
                         if (cameraDirection === "ahead") {
-                            cameraTarget.z = cameraPositionZ;
-                            cameraTarget.x = cameraPositionX + 1;
+                            mazeCameraTarget.z = cameraPositionZ;
+                            mazeCameraTarget.x = cameraPositionX + 1;
                         } else if (cameraDirection === "behind") {
-                            cameraTarget.z = cameraPositionZ;
-                            cameraTarget.x = cameraPositionX - 1;
+                            mazeCameraTarget.z = cameraPositionZ;
+                            mazeCameraTarget.x = cameraPositionX - 1;
                         } else {
                             if (targetPositionX > cameraPositionX){
                                 // Looking right
-                                cameraTarget.z = cameraPositionZ + 1;
-                                cameraTarget.x = cameraPositionX;
+                                mazeCameraTarget.z = cameraPositionZ + 1;
+                                mazeCameraTarget.x = cameraPositionX;
                             } else {
                                 // Looking left
-                                cameraTarget.z = cameraPositionZ - 1;
-                                cameraTarget.x = cameraPositionX;
+                                mazeCameraTarget.z = cameraPositionZ - 1;
+                                mazeCameraTarget.x = cameraPositionX;
                             }
                         }
                         break;
@@ -465,21 +454,33 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                         console.log(`key code is :${key}`);
                         break;
                 }
-                camera.lookAt(cameraTarget);
+                mazeCamera.lookAt(mazeCameraTarget);
                 // Move the light to the new camera position
-                light.position.x = camera.position.x;
-                light.position.y = camera.position.y;
-                light.position.z = camera.position.z;
-            }
+                cameraLight.position.x = mazeCamera.position.x;
+                cameraLight.position.y = mazeCamera.position.y;
+                cameraLight.position.z = mazeCamera.position.z;
+            };
+            return {
+                "scene": mazeScene,
+                "camera": mazeCamera,
+                "light": cameraLight
+            };
         };
 
         function render()
             {
                 requestAnimationFrame(render);
 
-                controls();
+                var userActions = controls(scene, camera, cameraTarget, light);
 
-                renderer.render(scene, camera);
+                // Update renderer
+                let mazeScene = userActions.scene,
+                    mazeCamera = userActions.camera;
+
+                // Update light
+                light = userActions.light;
+
+                renderer.render(mazeScene, mazeCamera);
             };
 
         render();
