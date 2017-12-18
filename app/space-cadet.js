@@ -72,30 +72,30 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Position the instructions next to the newly created Canvas element that will show the rendered scene
 
-        function positionInstructions(renderer) {
-            let instructions = document.getElementById("instructions");
-            document.body.insertBefore(renderer.domElement, document.body.firstChild);
+        function positionInstructions(renderControl, appContainer) {
+            let instructions = appContainer.getElementById("instructions");
+            appContainer.body.insertBefore(renderControl.domElement, appContainer.body.firstChild);
         }
 
-        positionInstructions(renderer);
+        positionInstructions(renderer, document);
 
         // Generate the materials needed for the scene
 
-        function generateMaterials() {
-            let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: THREE.BackSide } );
+        function generateMaterials(sideRenderingSystem) {
+            let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: sideRenderingSystem } );
             return {
                 tunnel: tunnelMaterial
             }
         }
 
-        var materials = generateMaterials();
+        var materials = generateMaterials(THREE.BackSide);
 
         var tunnelMaterial = materials.tunnel;
 
-        function buildRowBSP(length, width, height, material, position) {
+        function buildRowBSP(length, width, height, material, position, GraphicSystem) {
             // Create tunnel geometry and mesh for tunnel
-            let tunnelGeo = new THREE.CubeGeometry( length, width, height, 2, 2, 2 );
-            let tunnelMesh = new THREE.Mesh( tunnelGeo, tunnelMaterial );
+            let tunnelGeo = new GraphicSystem.CubeGeometry( length, width, height, 2, 2, 2 );
+            let tunnelMesh = new GraphicSystem.Mesh( tunnelGeo, tunnelMaterial );
             // Position tunnel so that it is centered on the x axis for the maze
             tunnelMesh.position.set(position.x,position.y,position.z);
             // Create the BSP for calculating the union of meshes
@@ -103,10 +103,10 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             return tunnel_bsp;
         }
 
-        function buildGalleryBSP(height, length, width, material, position) {
+        function buildGalleryBSP(height, length, width, material, position, GraphicSystem) {
             // Create geometry and mesh for the cubic galleries
-            let galleryGeo = new THREE.CubeGeometry( height, length, width, 2, 2, 2 );
-            let galleryMesh = new THREE.Mesh( galleryGeo, tunnelMaterial );
+            let galleryGeo = new GraphicSystem.CubeGeometry( height, length, width, 2, 2, 2 );
+            let galleryMesh = new GraphicSystem.Mesh( galleryGeo, tunnelMaterial );
             // Position the gallery at the specified coordinates (intersection of columns and rows)
             galleryMesh.position.set(position.x,position.y,position.z);
             // Create the BSP for calculating the union of meshes
@@ -114,23 +114,23 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             return gallery_bsp;
         }
 
-        function buildInitialRowBSP(tunnelMaterial, y, z, length, depth) {
+        function buildInitialRowBSP(tunnelMaterial, y, z, length, depth, GraphicSystem) {
             // Create the initial row with column tunnels from each gallery
             // Additional rows will be joined to these columns
 
-            var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: 0, z: 0});
+            var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: 0, z: 0}, GraphicSystem);
             var depth = Math.round(depth / 10) * 10;
             var length = Math.round(length / 10) * 10;
 
             for (var j = 0; j <= (length / 10); j++) {
-                let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
+                let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z}, GraphicSystem);
                 if (j !== (length / 10)){
                     mazePassages.push([(j * 10) + 5, z]);
                 }
                 tunnel_bsp = tunnel_bsp.union(gallery_bsp);
                 // Add depth tunnels
-                let depthGeo = new THREE.CubeGeometry( 3, 3, depth, 2, 2, 2 );
-                let depthMesh = new THREE.Mesh( depthGeo, tunnelMaterial );
+                let depthGeo = new GraphicSystem.CubeGeometry( 3, 3, depth, 2, 2, 2 );
+                let depthMesh = new GraphicSystem.Mesh( depthGeo, tunnelMaterial );
                 depthMesh.position.set(j * 10,y, ((depth * -1) / 2));
                 let depth_bsp = new ThreeBSP( depthMesh );
                 tunnel_bsp = tunnel_bsp.union(depth_bsp);
@@ -140,7 +140,7 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Build remaining rows
 
-        function buildAdditionalRows(bsp, tunnelMaterial, y, z, length, depth) {
+        function buildAdditionalRows(bsp, tunnelMaterial, y, z, length, depth, GraphicSystem) {
 
             // Build additional row consisting of tunnel and galleries, supplied with the initial row and tunnel BSP
 
@@ -148,9 +148,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             var length = Math.round(length / 10) * 10;
 
             for (var rowCount = 0; rowCount <= depthSteps; rowCount++) {
-                var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: y, z: z});
+                var tunnel_bsp = buildRowBSP(length, 3, 3, tunnelMaterial, {x: length / 2, y: y, z: z}, GraphicSystem);
                 for (var j = 0; j <= (length / 10); j++) {
-                    let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z});
+                    let gallery_bsp = buildGalleryBSP(5,5,5, tunnelMaterial, {x: j * 10, y: y, z: z}, GraphicSystem);
                     mazePassages.push([(j * 10), z + 5]);
                     if (j !== (length / 10)){
                         mazePassages.push([(j * 10) + 5, z]);
@@ -165,16 +165,16 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Perform geometry union
 
-        function generateMazeGeoemetry(){
-            let initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, mazeLength, mazeWidth);
-            let combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, mazeLength, mazeWidth);
+        function generateMazeGeoemetry(GraphicSystem){
+            let initialRowBSP = buildInitialRowBSP(tunnelMaterial, 0, 0, mazeLength, mazeWidth, GraphicSystem);
+            let combined_bsp = buildAdditionalRows(initialRowBSP, tunnelMaterial, 0, -10, mazeLength, mazeWidth, GraphicSystem);
             let combined_mesh = combined_bsp.toMesh( tunnelMaterial );
             return combined_mesh;
         }
 
-        var mazeFinal = generateMazeGeoemetry();
-
-        console.log(mazePassages);
+        // Call the maze generation wrapper function and pass it the THREE graphics library
+        // Maze generation is now purely functional
+        var mazeFinal = generateMazeGeoemetry(THREE);
 
         // Add unioned geometry to scene
 
@@ -467,12 +467,6 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
                 requestAnimationFrame(render);
 
                 controls();
-
-                // counter++;
-
-                // if (counter % 60 === 0) {
-                //     document.getElementById("time-elapsed").textContent = counter / 60;
-                // }
 
                 renderer.render(scene, camera);
             };
