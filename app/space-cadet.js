@@ -28,9 +28,11 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             light.position.set( 0, 0, 0 );
             scene.add( light );
 
+            // Set the maze dimensions
+
             let mazeDimensions = {
-                "length": 100,
-                "width": 100
+                "length": 30,
+                "width": 90
             }
 
             return {
@@ -46,8 +48,6 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Call scene setup
 
         var setUp = setUpScene();
-
-        // var counter = 0;
 
         // Use to keep track of the coordinates of all passages
         var mazePassages = [];
@@ -82,15 +82,20 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
         // Generate the materials needed for the scene
 
         function generateMaterials(sideRenderingSystem) {
+            // Use a MeshLambertMaterial for shadows
             let tunnelMaterial = new THREE.MeshLambertMaterial( { color: 0xBABABA, side: sideRenderingSystem } );
             return {
                 tunnel: tunnelMaterial
             }
         }
 
+        // Generate the material needed (this function designed to scale for multiple materials)
+
         var materials = generateMaterials(THREE.BackSide);
 
         var tunnelMaterial = materials.tunnel;
+
+        // Builds a single row, turning it into a BSP tree
 
         function buildRowBSP(length, width, height, material, position, GraphicSystem) {
             // Create tunnel geometry and mesh for tunnel
@@ -103,6 +108,8 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             return tunnel_bsp;
         }
 
+        // Builds a gallery, turning it into a BSP tree
+
         function buildGalleryBSP(height, length, width, material, position, GraphicSystem) {
             // Create geometry and mesh for the cubic galleries
             let galleryGeo = new GraphicSystem.CubeGeometry( height, length, width, 2, 2, 2 );
@@ -113,6 +120,9 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
             let gallery_bsp = new ThreeBSP( galleryMesh );
             return gallery_bsp;
         }
+
+        // Builds the initial row, which consists of a horizontal tunnel, tunnels with depth, and the initial galleries (looks like a rake from above)
+        // Additional rows are unioned to this initial geometry
 
         function buildInitialRowBSP(tunnelMaterial, y, z, length, depth, GraphicSystem) {
             // Create the initial row with column tunnels from each gallery
@@ -174,19 +184,20 @@ const ThreeBSP = require('../node_modules/three-js-csg/index.js')(THREE);
 
         // Call the maze generation wrapper function and pass it the THREE graphics library
         // Maze generation is now purely functional
+
         var mazeFinal = generateMazeGeoemetry(THREE);
 
         // Add unioned geometry to scene
 
         scene.add( mazeFinal );
 
+        // Count the passages
+
         for (var passageCounter = 0; passageCounter < 40; passageCounter++) {
             var passageIndex =  Math.ceil(Math.random() * mazePassages.length);
             // Remove passage now that it has been selected
             var passageSelected = mazePassages.splice(passageIndex, 1);
         }
-
-        // Set camera position and target
 
         // Move the camera in the three dimensional space
         function controls ()
